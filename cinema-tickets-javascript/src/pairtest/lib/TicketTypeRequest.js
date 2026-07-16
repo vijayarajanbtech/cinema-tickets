@@ -11,9 +11,7 @@ export default class TicketTypeRequest {
   #noOfTickets;
 
   constructor(type, noOfTickets) {
-    console.log('condi', !this.#ALLOWED_TYPES.includes(type))
     if (!this.#ALLOWED_TYPES.includes(type)) {
-      console.log('ttype', type)
       throw new TypeError('ticket type must be ADULT, CHILD or INFANT');
     }
 

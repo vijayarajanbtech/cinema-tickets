@@ -6,9 +6,13 @@ import InvalidPurchaseException from '../../src/pairtest/lib/InvalidPurchaseExce
 
 describe('TicketService', () => {
  let ticketService;
+ let paymentSpy;
+ let seatReservationSpy;
 
  beforeEach(() => {
  ticketService = new TicketService();
+ paymentSpy = sinon.stub(ticketService.paymentService, 'makePayment');
+ seatReservationSpy = sinon.stub(ticketService.seatReservationService, 'reserveSeat')
  });
 
  afterEach(() => {
@@ -119,6 +123,25 @@ describe('Business Rule Validation', () => {
  });
  });
 
+ describe('Total ticket price and total seat calculations', () => {
+ it('should invoke payment gateway and seat booking third party service with correct data', () => {
+ const expectedResponse = {
+     "TotalAmtCharged": 95,
+      "TotalSeatBooked": 5
+ }
+ const adultReq = new TicketTypeRequest('ADULT', 2); // 2 seats and  £50
+ const childReq = new TicketTypeRequest('CHILD', 3); // 3 seats and £45
+ const infantReq = new TicketTypeRequest('INFANT', 1); // No seat and £0
 
+ const response = ticketService.purchaseTickets(12345, adultReq, childReq, infantReq);
+
+ expect(paymentSpy.calledOnce).to.be.true;
+ expect(paymentSpy.firstCall.calledWith(12345, 95)).to.be.true; // Total = £95
+ expect(seatReservationSpy.calledOnce).to.be.true;
+ expect(seatReservationSpy.firstCall.calledWith(12345, 5)).to.be.true; // Total = 5 seats (No seat for Infant)
+ expect(paymentSpy.calledBefore(seatReservationSpy)).to.be.true;
+ expect(response).to.deep.equal(expectedResponse);
+ });
+ });
 
 });

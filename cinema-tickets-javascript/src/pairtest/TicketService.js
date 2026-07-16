@@ -1,15 +1,37 @@
 import TicketTypeRequest from './lib/TicketTypeRequest.js';
 import InvalidPurchaseException from './lib/InvalidPurchaseException.js';
+import TicketPaymentService from '../thirdparty/paymentgateway/TicketPaymentService.js';
+import SeatReservationService from '../thirdparty/seatbooking/SeatReservationService.js';
 
 export default class TicketService {
 
   MAX_TICKETS_PER_TRANSACTION = 25;
 
+  TICKET_PRICES = {
+    ADULT: 25,
+    CHILD: 15,
+    INFANT: 0
+    };
+  paymentService;
+  seatReservationService;
+
+  constructor() {
+    this.paymentService = new TicketPaymentService();
+    this.seatReservationService = new SeatReservationService();
+  }
+
   purchaseTickets(accountId, ...ticketTypeRequests) {
     this.validateAccountId(accountId);
     const counts = this.aggregateTicketCounts(ticketTypeRequests);
     this.validateBusinessRules(counts);
-   return "SUCCESS";
+    const totalPrice = this.calculateTotalPrice(counts);
+    const totalSeats = this.calculateTotalSeats(counts);
+    this.paymentService.makePayment(accountId, totalPrice);
+    this.seatReservationService.reserveSeat(accountId, totalSeats);
+    return {
+      "TotalAmtCharged": totalPrice,
+      "TotalSeatBooked": totalSeats
+    };
   }
 
   validateAccountId(accountId) {
@@ -49,5 +71,18 @@ export default class TicketService {
   if (counts.INFANT > counts.ADULT) {
   throw new InvalidPurchaseException('The number of Infants cannot exceed the number of Adults.');
   }
+ }
+
+ calculateTotalPrice(counts) {
+  return (
+  counts.ADULT * this.TICKET_PRICES.ADULT +
+  counts.CHILD * this.TICKET_PRICES.CHILD +
+  counts.INFANT * this.TICKET_PRICES.INFANT
+  );
+ }
+
+ calculateTotalSeats(counts) {
+  // Infants sit on laps and do not occupy an allocated seat
+  return counts.ADULT + counts.CHILD;
  }
 }
