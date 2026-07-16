@@ -28,9 +28,8 @@ This project is a solution for the DWP Javascript Software Engineer coding exerc
 - Accounts with ID > 0 are valid and have sufficient funds.
 - External services (`TicketPaymentService` and `SeatReservationService`) work reliably.
 
-## Test Coverage
-
 ## How to run the test
+- npm run test
 
 
 
