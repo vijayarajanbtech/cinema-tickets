@@ -3,21 +3,27 @@
  */
 
 export default class TicketTypeRequest {
+
+  #ALLOWED_TYPES = ['ADULT', 'CHILD', 'INFANT'];
+
   #type;
 
   #noOfTickets;
 
   constructor(type, noOfTickets) {
-    if (!this.#Type.includes(type)) {
-      throw new TypeError(`type must be ${this.#Type.slice(0, -1).join(', ')}, or ${this.#Type.slice(-1)}`);
+    console.log('condi', !this.#ALLOWED_TYPES.includes(type))
+    if (!this.#ALLOWED_TYPES.includes(type)) {
+      console.log('ttype', type)
+      throw new TypeError('ticket type must be ADULT, CHILD or INFANT');
     }
 
-    if (!Number.isInteger(noOfTickets)) {
-      throw new TypeError('noOfTickets must be an integer');
+    if (!Number.isInteger(noOfTickets) || noOfTickets <= 0) {
+      throw new TypeError('noOfTickets must be an integer and greater than 0');
     }
 
     this.#type = type;
     this.#noOfTickets = noOfTickets;
+    Object.freeze(this);
   }
 
   getNoOfTickets() {
@@ -28,5 +34,4 @@ export default class TicketTypeRequest {
     return this.#type;
   }
 
-  #Type = ['ADULT', 'CHILD', 'INFANT'];
 }
