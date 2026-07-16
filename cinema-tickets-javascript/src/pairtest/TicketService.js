@@ -9,7 +9,7 @@ export default class TicketService {
   }
 
   validateAccountId(accountId) {
-    if (accountId === 0) {
+    if (accountId <= 0) {
     throw new InvalidPurchaseException('Account ID must be a valid positive integer.');
     }
  }

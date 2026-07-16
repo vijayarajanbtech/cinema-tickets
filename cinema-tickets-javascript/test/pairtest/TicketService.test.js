@@ -21,5 +21,11 @@ describe('TicketService', () => {
  ticketService.purchaseTickets(0, new TicketTypeRequest('ADULT', 1));
  }).to.throw(InvalidPurchaseException, 'Account ID must be a valid positive integer.');
  });
+
+ it('should throw InvalidPurchaseException if account ID is a negative value', () => {
+ expect(() => {
+ ticketService.purchaseTickets(-50, new TicketTypeRequest('ADULT', 1));
+ }).to.throw(InvalidPurchaseException);
+ });
  });
 });
