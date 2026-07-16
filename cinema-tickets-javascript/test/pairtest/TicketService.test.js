@@ -6,15 +6,15 @@ import InvalidPurchaseException from "../../src/pairtest/lib/InvalidPurchaseExce
 
 describe("TicketService", () => {
   let ticketService;
-  let paymentSpy;
-  let seatReservationSpy;
+  let mockPaymentService;
+  let mockSeatReservationService;
 
   beforeEach(() => {
-    ticketService = new TicketService();
-    paymentSpy = sinon.stub(ticketService.paymentService, "makePayment");
-    seatReservationSpy = sinon.stub(
-      ticketService.seatReservationService,
-      "reserveSeat",
+    mockPaymentService = { makePayment: sinon.spy() };
+    mockSeatReservationService = { reserveSeat: sinon.spy() };
+    ticketService = new TicketService(
+      mockPaymentService,
+      mockSeatReservationService,
     );
   });
 
@@ -25,13 +25,13 @@ describe("TicketService", () => {
   describe("MAX_TICKETS_PER_TRANSACTION config", () => {
     it("should use the custom limit provided by process.env", () => {
       process.env.MAX_TICKETS_PER_TRANSACTION = "5";
-      const ticketService = new TicketService();
+      ticketService = new TicketService();
       assert.strictEqual(ticketService.MAX_TICKETS_PER_TRANSACTION, 5);
     });
 
     it("should fallback to 25 if process.env.MAX_TICKETS_PER_TRANSACTION is missing", () => {
       delete process.env.MAX_TICKETS_PER_TRANSACTION;
-      const ticketService = new TicketService();
+      ticketService = new TicketService();
       assert.strictEqual(ticketService.MAX_TICKETS_PER_TRANSACTION, 25);
     });
   });
@@ -41,7 +41,7 @@ describe("TicketService", () => {
       process.env.TICKET_PRICE_ADULT = "50";
       process.env.TICKET_PRICE_CHILD = "30";
       process.env.TICKET_PRICE_INFANT = "5";
-      const ticketService = new TicketService();
+      ticketService = new TicketService();
       assert.strictEqual(ticketService.TICKET_PRICES.ADULT, 50);
       assert.strictEqual(ticketService.TICKET_PRICES.CHILD, 30);
       assert.strictEqual(ticketService.TICKET_PRICES.INFANT, 5);
@@ -51,7 +51,7 @@ describe("TicketService", () => {
       delete process.env.TICKET_PRICE_ADULT;
       delete process.env.TICKET_PRICE_CHILD;
       delete process.env.TICKET_PRICE_INFANT;
-      const ticketService = new TicketService();
+      ticketService = new TicketService();
       assert.strictEqual(ticketService.TICKET_PRICES.ADULT, 25);
       assert.strictEqual(ticketService.TICKET_PRICES.CHILD, 15);
       assert.strictEqual(ticketService.TICKET_PRICES.INFANT, 0);
@@ -206,26 +206,32 @@ describe("TicketService", () => {
 
   describe("Total ticket price and total seat calculations", () => {
     it("should invoke payment gateway and seat booking third party service with correct data", () => {
+      const accountId = 12345;
       const expectedResponse = {
         TotalAmtCharged: 95,
         TotalSeatBooked: 5,
       };
-      const adultReq = new TicketTypeRequest("ADULT", 2); // 2 seats and  £50
+      const adultReq = new TicketTypeRequest("ADULT", 2); // 2 seats and £50
       const childReq = new TicketTypeRequest("CHILD", 3); // 3 seats and £45
       const infantReq = new TicketTypeRequest("INFANT", 1); // No seat and £0
 
       const response = ticketService.purchaseTickets(
-        12345,
+        accountId,
         adultReq,
         childReq,
         infantReq,
       );
 
-      expect(paymentSpy.calledOnce).to.be.true;
-      expect(paymentSpy.firstCall.calledWith(12345, 95)).to.be.true; // Total = £95
-      expect(seatReservationSpy.calledOnce).to.be.true;
-      expect(seatReservationSpy.firstCall.calledWith(12345, 5)).to.be.true; // Total = 5 seats (No seat for Infant)
-      expect(paymentSpy.calledBefore(seatReservationSpy)).to.be.true;
+      expect(mockPaymentService.makePayment.calledOnce).to.be.true;
+      expect(mockPaymentService.makePayment.firstCall.args).to.deep.equal([
+        accountId,
+        95,
+      ]);
+      expect(mockSeatReservationService.reserveSeat.calledOnce).to.be.true;
+      expect(
+        mockSeatReservationService.reserveSeat.firstCall.args,
+      ).to.deep.equal([accountId, 5]);
+
       expect(response).to.deep.equal(expectedResponse);
     });
   });
