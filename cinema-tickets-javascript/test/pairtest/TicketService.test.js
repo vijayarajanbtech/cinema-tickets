@@ -27,5 +27,11 @@ describe('TicketService', () => {
  ticketService.purchaseTickets(-50, new TicketTypeRequest('ADULT', 1));
  }).to.throw(InvalidPurchaseException);
  });
+
+ it('should throw InvalidPurchaseException if account ID is not a numeric primitive', () => {
+ expect(() => {
+ ticketService.purchaseTickets('account-xyz', new TicketTypeRequest('ADULT', 1));
+ }).to.throw(InvalidPurchaseException);
+ });
  });
 });
