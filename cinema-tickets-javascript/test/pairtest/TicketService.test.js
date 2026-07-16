@@ -29,13 +29,13 @@ describe('TicketService', () => {
  it('should throw InvalidPurchaseException if account ID is a negative value', () => {
  expect(() => {
  ticketService.purchaseTickets(-50, new TicketTypeRequest('ADULT', 1));
- }).to.throw(InvalidPurchaseException);
+ }).to.throw(InvalidPurchaseException, 'Account ID must be a valid positive integer.');
  });
 
  it('should throw InvalidPurchaseException if account ID is not a numeric primitive', () => {
  expect(() => {
  ticketService.purchaseTickets('account-xyz', new TicketTypeRequest('ADULT', 1));
- }).to.throw(InvalidPurchaseException);
+ }).to.throw(InvalidPurchaseException, 'Account ID must be a valid positive integer.');
  });
 
   it('should not throw InvalidPurchaseException if it is a good account ID', () => {
@@ -102,7 +102,7 @@ describe('Business Rule Validation', () => {
  const infantOnly = new TicketTypeRequest('INFANT', 1);
  expect(() => {
  ticketService.purchaseTickets(12345, infantOnly);
- }).to.throw(InvalidPurchaseException);
+ }).to.throw(InvalidPurchaseException, 'Child and Infant tickets cannot be purchased without an Adult ticket.');
  });
 
  it('should throw InvalidPurchaseException where the count of infants exceeds the count of available adult laps', () => {
