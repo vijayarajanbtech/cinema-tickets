@@ -7,10 +7,17 @@
   },
   "type": "module",
   "scripts": {
-    "test": "mocha test/**/*.js"
+    "test": "mocha test/**/*.js",
+    "test:coverage": "c8 mocha test/**/*.js",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "c8": "11.0.0",
     "chai": "6.2.2",
+    "eslint": "^10.7.0",
+    "globals": "^17.7.0",
     "mocha": "^11.7.6",
     "sinon": "22.0.0"
   }

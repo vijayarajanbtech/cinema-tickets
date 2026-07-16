@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 
 export default class SeatReservationService {
   reserveSeat(accountId, totalSeatsToAllocate) {

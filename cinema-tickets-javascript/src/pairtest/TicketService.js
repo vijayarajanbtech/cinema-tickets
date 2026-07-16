@@ -1,4 +1,3 @@
-import TicketTypeRequest from './lib/TicketTypeRequest.js';
 import InvalidPurchaseException from './lib/InvalidPurchaseException.js';
 import TicketPaymentService from '../thirdparty/paymentgateway/TicketPaymentService.js';
 import SeatReservationService from '../thirdparty/seatbooking/SeatReservationService.js';
@@ -21,11 +20,11 @@ export default class TicketService {
   }
 
   purchaseTickets(accountId, ...ticketTypeRequests) {
-    this.validateAccountId(accountId);
-    const counts = this.aggregateTicketCounts(ticketTypeRequests);
-    this.validateBusinessRules(counts);
-    const totalPrice = this.calculateTotalPrice(counts);
-    const totalSeats = this.calculateTotalSeats(counts);
+    this.#validateAccountId(accountId);
+    const counts = this.#aggregateTicketCounts(ticketTypeRequests);
+    this.#validateBusinessRules(counts);
+    const totalPrice = this.#calculateTotalPrice(counts);
+    const totalSeats = this.#calculateTotalSeats(counts);
     this.paymentService.makePayment(accountId, totalPrice);
     this.seatReservationService.reserveSeat(accountId, totalSeats);
     return {
@@ -34,13 +33,13 @@ export default class TicketService {
     };
   }
 
-  validateAccountId(accountId) {
+  #validateAccountId(accountId) {
     if (!accountId || typeof accountId !== 'number' || accountId <= 0) {
     throw new InvalidPurchaseException('Account ID must be a valid positive integer.');
     }
   }
 
-  aggregateTicketCounts(requests) {
+  #aggregateTicketCounts(requests) {
     const counts = { ADULT: 0, CHILD: 0, INFANT: 0, total: 0 };
 
     for (const request of requests) {
@@ -55,7 +54,7 @@ export default class TicketService {
     return counts;
   }
 
-  validateBusinessRules(counts) {
+  #validateBusinessRules(counts) {
   if (counts.total > this.MAX_TICKETS_PER_TRANSACTION) {
   throw new InvalidPurchaseException(
   `Cannot purchase more than ${this.MAX_TICKETS_PER_TRANSACTION} tickets in a single transaction.`
@@ -73,7 +72,7 @@ export default class TicketService {
   }
  }
 
- calculateTotalPrice(counts) {
+ #calculateTotalPrice(counts) {
   return (
   counts.ADULT * this.TICKET_PRICES.ADULT +
   counts.CHILD * this.TICKET_PRICES.CHILD +
@@ -81,7 +80,7 @@ export default class TicketService {
   );
  }
 
- calculateTotalSeats(counts) {
+ #calculateTotalSeats(counts) {
   // Infants sit on laps and do not occupy an allocated seat
   return counts.ADULT + counts.CHILD;
  }
