@@ -4,12 +4,12 @@ import SeatReservationService from '../thirdparty/seatbooking/SeatReservationSer
 
 export default class TicketService {
 
-  MAX_TICKETS_PER_TRANSACTION = 25;
+  MAX_TICKETS_PER_TRANSACTION = Number(process.env.MAX_TICKETS_PER_TRANSACTION) || 25;
 
   TICKET_PRICES = {
-    ADULT: 25,
-    CHILD: 15,
-    INFANT: 0
+    ADULT: Number(process.env.TICKET_PRICE_ADULT) || 25,
+    CHILD: Number(process.env.TICKET_PRICE_CHILD) || 15,
+    INFANT: Number(process.env.TICKET_PRICE_INFANT) || 0
     };
   paymentService;
   seatReservationService;

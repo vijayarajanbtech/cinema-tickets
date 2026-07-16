@@ -1,5 +1,5 @@
 # Candidate Number/Application ID : 17993591
-# Compaign Number : 461977
+# Campaign Number : 461977
 # DWP Cinema Tickets - Javascript Coding Exercise
 ## Overview
 This project is a solution for the DWP Javascript Software Engineer coding exercise. It provides a `TicketService` implementation that allows the purchase of Adult, Child, and Infant cinema tickets, ensuring all business rules and constraints are met.
